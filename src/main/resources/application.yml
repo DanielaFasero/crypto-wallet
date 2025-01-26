@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: crypto-wallet
+  flyway:
+    locations: classpath:db.migration
+
+
+
+asset-price-updater:
+  timer:
+    cron: 0 0 4 * * *
+
+swiss:
+  asset-price-updater:
+    trigger-initial-load: false
+  coin-cap-url: "https://api.coincap.io/v2"

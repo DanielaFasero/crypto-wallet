@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cryptoWallet
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      jakarta.persistence.validation.mode: none
+    hibernate:
+      ddl-auto: update # Optional: use "update" or "create-drop" for development, "validate" for production
+    show-sql: false
+server:
+  port: 8083
+
+asset-price-updater:
+  timer:
+    cron: 1 * * * * *
+
+swiss:
+  asset-price-updater:
+    trigger-initial-load: true
+  coin-cap-url: "https://api.coincap.io/v2"

@@ -1,0 +1,283 @@
+openapi: 3.0.3
+info:
+  title: User Management API
+  version: 1.0.0
+  description: API for managing users and retrieving user wallet information.
+paths:
+  /users/createUser:
+    post:
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        description: Request payload to create a new user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreationRequest'
+      responses:
+        '200':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreationResponse'
+        '208':
+          description: The user already exists (conflict with an existing user)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User with the following email already exists: user@example.com"
+
+  /users/total:
+    post:
+      summary: Get total information of user wallet
+      operationId: getTotalInformationOfUserWallet
+      requestBody:
+        description: Request payload to retrieve user wallet information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInformationRequest'
+      responses:
+        '200':
+          description: User wallet information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInformationResponse'
+        '400':
+          description: The user doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User was not found with the following email: user@example.com "
+
+  /assets/addAsset:
+    post:
+      summary: Adds an asset to the wallet
+      operationId: addAsset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToWalletRequest'
+      responses:
+        '200':
+          description: Asset successfully added to the wallet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddToWalletResponse'
+        '400':
+          description: User doesnt exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddToWalletResponse'
+
+
+  /assets/walletEvaluation:
+    post:
+      summary: Evaluates the assets in the wallet
+      operationId: walletEvaluation
+      requestBody:
+        description: Wallet evaluation request with asset details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletEvaluationRequest'
+      responses:
+        '200':
+          description: Wallet evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletEvaluationResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               type: string
+
+components:
+  schemas:
+    UserCreationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: stuffs@moreStuffs.com
+    UserCreationResponse:
+      type: object
+      properties:
+        userDTO:
+          $ref: '#/components/schemas/UserDTO'
+    UserInformationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: stuffs@moreStuffs.com
+    UserInformationResponse:
+      type: object
+      properties:
+        outputMessage:
+          type: string
+          example: "User wallet information retrieved successfully."
+        wallet:
+          $ref: '#/components/schemas/WalletDTO'
+        httpStatus:
+          type: string
+          example: "OK"
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          example: stuffs@moreStuffs.com
+        wallet:
+          $ref: '#/components/schemas/WalletDTO'
+    WalletDTO:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        total:
+          type: number
+          format: double
+          example: 1500.75
+          nullable: true
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetDTO'
+          nullable: true
+    AssetDTO:
+      type: object
+      nullable: true
+      properties:
+        symbol:
+          type: string
+          example: BTC
+          nullable: true
+        quantity:
+          type: number
+          format: double
+          example: 0.5
+          nullable: true
+        price:
+          type: number
+          format: double
+          example: 50000.00
+          nullable: true
+        currentValue:
+          type: number
+          format: double
+          example: 25000.00
+          nullable: true
+    AddToWalletRequest:
+      type: object
+      properties:
+        userEmail:
+          type: string
+          format: email
+          description: The user's email address
+        symbol:
+          type: string
+          description: The symbol of the asset/token
+        price:
+          type: number
+          format: float
+          description: The price of the asset/token
+        quantity:
+          type: number
+          format: float
+          description: The quantity of the asset/token to be added
+      required:
+        - userEmail
+        - symbol
+        - price
+        - quantity
+
+    AddToWalletResponse:
+      type: object
+      properties:
+        outputMessage:
+          type: string
+          description: Message indicating the result of the add asset/token operation
+    WalletEvaluationRequest:
+      type: object
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetForWalletEvaluation'
+          description: List of assets/token to be evaluated
+        startDate:
+          type: string
+          format: date
+          description: The start date for the evaluation range
+        endDate:
+          type: string
+          format: date
+          description: The end date for the evaluation range
+      required:
+        - assets
+        - startDate
+        - endDate
+    AssetForWalletEvaluation:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: The asset/token symbol
+        quantity:
+          type: number
+          format: float
+          description: The quantity of the asset/token for evaluation
+      required:
+        - symbol
+        - quantity
+
+    WalletEvaluationResponse:
+      type: object
+      properties:
+        total:
+          type: number
+          format: float
+          description: The total value of the assets/token in the wallet after evaluation
+        bestAsset:
+          type: string
+          description: The symbol of the best-performing asset
+        bestPerformance:
+          type: number
+          format: float
+          description: The performance (e.g., return on investment) of the best asset/token
+        worstAsset:
+          type: string
+          description: The symbol of the worst-performing asset/token
+        worstPerformance:
+          type: number
+          format: float
+          description: The performance (e.g., return on investment) of the worst asset/token
+
